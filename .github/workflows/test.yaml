@@ -10,22 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your repo
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Build and push Docker image using official GitHub action
+      # 1. Setup Buildx (Fixes the "Cache export not supported" error)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 2. Login to Docker Hub (Fixes permission denied on push)
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Build and Push
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/node-app:latest
           context: .
           file: ./Dockerfile
-          # Optional: enable caching for faster builds
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}node-app:latest
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}node-app:latest,mode=max
+          push: true
+          # Note the added / between username and image name below
+          tags: ${{ secrets.DOCKER_USERNAME }}/node-app:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/node-app:latest
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/node-app:latest,mode=max
 
-      # Step 3 (optional): Log success
       - name: Success
         run: echo "Docker image built and pushed successfully!"
