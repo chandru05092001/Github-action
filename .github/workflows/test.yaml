@@ -23,8 +23,8 @@ jobs:
           context: .
           file: ./Dockerfile
           # Optional: enable caching for faster builds
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/node-app:latest
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/node-app:latest,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}node-app:latest
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}node-app:latest,mode=max
 
       # Step 3 (optional): Log success
       - name: Success
