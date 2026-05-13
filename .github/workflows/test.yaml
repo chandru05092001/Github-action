@@ -18,24 +18,35 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push image
-        uses: docker/build-push-action@v6
+      # --- 1. SAST: Scanning your custom code logic ---
+      - name: Run Snyk to check for code vulnerabilities
+        uses: snyk/actions/node@master # Use 'python' or 'golang' depending on your app
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          context: .
-          push: false
-          tags: chandru0509/my-app:v1
+          args: --severity-threshold=high
 
-      - name: Run Trivy filesystem scan
+      # --- 2. SCA: Scanning your libraries/dependencies ---
+      - name: Run Trivy FS scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
           severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-      - name: Build and push image
+          exit-code: '1'
+
+      # --- 3. BUILD: If code and libraries are safe, build the image ---
+      - name: Build image locally
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true 
+          load: true 
           tags: chandru0509/my-app:v1
-          
+
+      # --- 4. IMAGE SCAN: Scan the final container OS ---
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'chandru0509/my-app:v1'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
