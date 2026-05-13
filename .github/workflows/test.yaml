@@ -17,6 +17,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Built-in GitHub token
+        with:
+          args: detect --verbose
 
       # --- 1. SAST: Scanning your custom code logic ---
       - name: Run Snyk to check for code vulnerabilities
