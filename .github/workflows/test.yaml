@@ -23,4 +23,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: chandru0509/my-app:v1
+          tags: chandru0509/my-app:v1.0.0
